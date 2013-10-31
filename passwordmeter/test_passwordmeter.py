@@ -11,8 +11,11 @@ import passwordmeter as pwm
 
 class TestFactor(pwm.Factor):
   category = 'test'
+  def __init__(self, prefix='test value is', *args, **kw):
+    self.prefix = prefix
+    super(TestFactor, self).__init__(*args, **kw)
   def test(self, value, extra):
-    return (0.5, 'test value is: ' + value)
+    return (0.5, self.prefix + ': ' + value)
 
 #------------------------------------------------------------------------------
 class TestPasswordMeter(unittest.TestCase):
@@ -46,6 +49,19 @@ class TestPasswordMeter(unittest.TestCase):
         factors=['length', TestFactor])).test('short')[1],
       {'test': 'test value is: short',
        'length': 'Increase the length of the password'})
+
+  #----------------------------------------------------------------------------
+  def test_supplementalFactor(self):
+    settings = dict()
+    settings['factor.test.class']  = 'passwordmeter.test_passwordmeter.TestFactor'
+    settings['factor.test.prefix'] = 'test value (with prefix) is'
+    res = pwm.Meter(settings=settings).test('short')
+    self.assertEqual(
+      sorted(res[1]),
+      ['casemix', 'charmix', 'length', 'notword', 'phrase', 'test'])
+    self.assertEqual(
+      res[1]['test'],
+      'test value (with prefix) is: short')
 
   #----------------------------------------------------------------------------
   def test_strength(self):

@@ -49,12 +49,14 @@ class Factor(object):
   def __init__(self, weight=DEFAULT_WEIGHT,
                clipmin=DEFAULT_CLIPMIN, clipmax=DEFAULT_CLIPMAX,
                skew=DEFAULT_SKEW, spread=DEFAULT_SPREAD,
-               ):
+               **kw):
     self.weight     = float(weight)
     self.clipmin    = float(clipmin)
     self.clipmax    = float(clipmax)
     self.skew       = float(skew)
     self.spread     = float(spread)
+    if 'category' in kw:
+      self.category = kw['category']
   def test(self, value, extra):
     raise NotImplementedError()
   def adjust(self, value):
@@ -160,6 +162,12 @@ class Meter(object):
     factors = settings.get('factors') or DEFAULT_FACTORS
     if asset.isstr(factors):
       factors = [s.strip() for s in factors.split(',')]
+    for key in settings.keys():
+      key = key.split('.')
+      if len(key) >= 3 \
+          and key[0] == 'factor' and key[2] == 'class' \
+          and key[1] not in factors:
+        factors.append(key[1])
     self.factors = [self._load(factor, settings) for factor in factors]
     self.logger  = asset.symbol(settings.get('logger'))
 
@@ -173,10 +181,15 @@ class Meter(object):
       'notword'  : NotWordFactor,
       'phrase'   : PhraseFactor,
       }
-    # TODO: apply settings!...
+    params = dict()
+    if asset.isstr(factor):
+      for key, value in settings.items():
+        if key.startswith('factor.' + factor + '.'):
+          params[key[len(factor) + 8:]] = value
+    factor = params.pop('class', factor)
     if factor in predef:
-      return predef[factor]()
-    return asset.symbol(factor)()
+      return predef[factor](**params)
+    return asset.symbol(factor)(**params)
 
   #----------------------------------------------------------------------------
   def test(self, value, extra=None):
@@ -199,17 +212,17 @@ class Meter(object):
     weight = 0
     morelist = []
     for factor in self.factors:
-      result = factor.test(value, extra)
-      s, w   = factor.adjust(result[0])
-      c      = curve(s)
+      result   = factor.test(value, extra)
+      scr, wgt = factor.adjust(result[0])
+      crv      = curve(scr)
       if self.logger:
         self.logger.debug(
           'factor %s: score=%f, base-weight=%f, curve-weight=%f',
-          factor.category, s, w, c)
-      score  += s * w
-      weight += w
+          factor.category, scr, wgt, crv)
+      score  += scr * wgt
+      weight += wgt
       if result[1]:
-        morelist.append((s, factor, result[1]))
+        morelist.append((scr, factor, result[1]))
     score = max(0, min(1, score / weight))
     more  = dict()
     if score < 1.0:
