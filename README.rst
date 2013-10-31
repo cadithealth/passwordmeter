@@ -49,7 +49,7 @@ and the values are internationalizable strings that are human-friendly
 descriptions and possibly tailored to the specific password.
 
 A password's strength is determined by doing a weighted, skewed,
-average of a set of "factors". The `Meter` constructor takes a
+curved average of a set of "factors". The `Meter` constructor takes a
 `settings` dictionary that configures, customizes, and/or supplements
 the default set of factors.
 
@@ -98,7 +98,62 @@ with the following keys:
         return (1, None)
 
     meter = passwordmeter.Meter(
+      settings=dict(factors=['length', SillyFactor]))
+
+    # or, same thing, but using an asset-spec:
+
+    meter = passwordmeter.Meter(
       settings=dict(factors='length,mypackage.SillyFactor'))
+
+* ``factor.{NAME}.{ATTRIBUTE}``:
+
+  Set a factor's attribute during initialization. If a setting in the
+  form ``factor.{NAME}.class`` is specified for a factor not listed in
+  the `factors` setting, the factor will be auto-added to the list of
+  factors. This is the preferred mechanism to add a custom factor to
+  the default list.
+
+  The following attributes are "special" (all are optional):
+
+  ===========================  ================================================
+  Attribute                    Interpretation
+  ===========================  ================================================
+  ``factor.{NAME}.class``      Specifies the asset-spec for the factory that
+                               can generate a Factor of this type.
+  ``factor.{NAME}.weight``     Specifies the relative weight of this factor
+                               (default: 1).
+  ``factor.{NAME}.skew``       Adds the specified amount to factor score
+                               (default: 0).
+  ``factor.{NAME}.spread``     Multiplies the factor score by the specified
+                               amount -- similar to `weight`, but is applied
+                               before clipping (default: 1).
+  ``factor.{NAME}.clipmin``    Force a minimum score for this factor
+                               (default: 0).
+  ``factor.{NAME}.clipmax``    Force a maximum score for this factor
+                               (default: 1.3).
+  ``factor.{NAME}.category``   Override the default improvement category.
+  ===========================  ================================================
+
+  The following example settings in an INI file will give the `length`
+  factor additional weight as well as adding the "mypkg.MyFactor"
+  custom factor (initialized with the parameter `msg` set to
+  ``'abort'``) to the meter's list:
+
+  .. code-block:: ini
+
+    factor.length.weight   = 2.5
+    factor.cust.class      = mypkg.MyFactor
+    factor.cust.msg        = abort
+
+* ``pessimism``:
+
+  The password strength engine weights low scores higher than high
+  scores. The degree to which the engine weights low scores is set by
+  the `pessimism` setting, which defaults to 10 -- the higher, the
+  more a low score will pull the average score down. For example, with
+  the default pessimism of 10, the two scores 0.75 and 0.25 will be
+  averaged to 0.4 (instead of the true average of 0.5).
+
 
 Custom Factors
 ==============
