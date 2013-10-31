@@ -50,29 +50,29 @@ class TestPasswordMeter(unittest.TestCase):
   #----------------------------------------------------------------------------
   def test_strength(self):
     meter = pwm.Meter()
-    p0 = meter.test('')[0]
-    p1 = meter.test('password')[0]
-    p2 = meter.test('pssa')[0]
-    p3 = meter.test('pssawrd')[0]
-    p4 = meter.test('pss4wr')[0]
-    p5 = meter.test('pss4wr0d')[0]
-    p6 = meter.test('p$$4wr0d!')[0]
-    p7 = meter.test('p$$4WR0d!')[0]
-    p8 = meter.test('p$4$WR0d!')[0]
-    p9 = meter.test('my voice is my p$$4WR0d!')[0]
-    pA = meter.test('mY voiCE is my p$$4WR0d!')[0]
-    pB = meter.test('mY voiC3 !s m-y p$$4WR0d!')[0]
-    self.assertLess(p0, p1)
-    self.assertLess(p1, p2)
-    self.assertLess(p2, p3)
-    self.assertLess(p3, p4)
-    self.assertLess(p4, p5)
-    self.assertLess(p5, p6)
-    self.assertLess(p6, p7)
-    self.assertLess(p7, p8)
-    self.assertLess(p8, p9)
-    self.assertLess(p9, pA)
-    self.assertLessEqual(pA, pB)
+    passwords = (
+      '',
+      'password',
+      'password1',
+      'pssa',
+      'pss4wr',
+      'pssawrd',
+      'pss4wr0d',
+      'p$$4wr0d!',
+      'p$$4WR0d!',
+      'p$4$WR0d!',
+      'my voice is my p$$4WR0d!',
+      'mY voiCE is my p$$4WR0d!',
+      'mY voiC3 !s m-y p$$4WR0d!',
+      )
+    for idx, pw0 in enumerate(passwords[:-1]):
+      pw1 = passwords[idx + 1]
+      sc0 = meter.test(pw0)[0]
+      sc1 = meter.test(pw1)[0]
+      self.assertLessEqual(
+        sc0, sc1,
+        'expected password "%s" (%f) to be as strong or stronger than "%s" (%f)'
+        % (pw1, sc1, pw0, sc0))
 
 #------------------------------------------------------------------------------
 # end of $Id$
