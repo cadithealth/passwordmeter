@@ -154,6 +154,13 @@ with the following keys:
   the default pessimism of 10, the two scores 0.75 and 0.25 will be
   averaged to 0.4 (instead of the true average of 0.5).
 
+* ``threshold``:
+
+  Specifies the maximum score for which improvement messages should be
+  returned. If not specified, all possible improvements will be
+  returned, even if the relevant factor returned a perfect score (1.0
+  or greater).
+
 
 Custom Factors
 ==============
