@@ -26,7 +26,7 @@ test_dependencies = [
 
 dependencies = [
   'distribute           >= 0.6.24',
-  'asset                >= 0.0.3',
+  'asset                >= 0.0.4',
   ]
 
 entrypoints = {
