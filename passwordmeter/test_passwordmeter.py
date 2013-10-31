@@ -29,6 +29,7 @@ class TestPasswordMeter(unittest.TestCase):
   #----------------------------------------------------------------------------
   def test_strength(self):
     meter = pwm.Meter()
+    p0 = meter.test('')[0]
     p1 = meter.test('password')[0]
     p2 = meter.test('pssa')[0]
     p3 = meter.test('pssawrd')[0]
@@ -40,6 +41,7 @@ class TestPasswordMeter(unittest.TestCase):
     p9 = meter.test('my voice is my p$$4WR0d!')[0]
     pA = meter.test('mY voiCE is my p$$4WR0d!')[0]
     pB = meter.test('mY voiC3 !s m-y p$$4WR0d!')[0]
+    self.assertLess(p0, p1)
     self.assertLess(p1, p2)
     self.assertLess(p2, p3)
     self.assertLess(p3, p4)
