@@ -13,6 +13,13 @@ import passwordmeter as pwm
 class TestPasswordMeter(unittest.TestCase):
 
   #----------------------------------------------------------------------------
+  def test_default(self):
+    res = pwm.test('password')
+    self.assertEqual(len(res), 2)
+    self.assertIsInstance(res[0], float)
+    self.assertIsInstance(res[1], dict)
+
+  #----------------------------------------------------------------------------
   def test_notword(self):
     self.assertEqual(
       pwm.Meter(settings=dict(factors='notword')).test('password')[0], 0)
