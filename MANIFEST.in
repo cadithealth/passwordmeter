@@ -1,0 +1,2 @@
+include *.txt *.ini *.cfg *.rst *.json *.yaml
+recursive-include passwordmeter *.txt
