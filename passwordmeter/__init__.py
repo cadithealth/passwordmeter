@@ -29,10 +29,10 @@ def asym(value, target, switch=DEFAULT_INFLECT):
   return switch * value / target
 
 #------------------------------------------------------------------------------
-def curve(value):
+def curve(value, offset=0.05):
   if value < 0:
     value = 0
-  return 1.0 / ( 0.05 + value )
+  return 1.0 / ( offset + value )
 
 #------------------------------------------------------------------------------
 def curveavg(values):
@@ -49,14 +49,15 @@ class Factor(object):
   def __init__(self, weight=DEFAULT_WEIGHT,
                clipmin=DEFAULT_CLIPMIN, clipmax=DEFAULT_CLIPMAX,
                skew=DEFAULT_SKEW, spread=DEFAULT_SPREAD,
-               **kw):
+               category=None,
+               ):
     self.weight     = float(weight)
     self.clipmin    = float(clipmin)
     self.clipmax    = float(clipmax)
     self.skew       = float(skew)
     self.spread     = float(spread)
-    if 'category' in kw:
-      self.category = kw['category']
+    if category is not None:
+      self.category = category
   def test(self, value, extra):
     raise NotImplementedError()
   def adjust(self, value):
@@ -168,8 +169,9 @@ class Meter(object):
           and key[0] == 'factor' and key[2] == 'class' \
           and key[1] not in factors:
         factors.append(key[1])
-    self.factors = [self._load(factor, settings) for factor in factors]
-    self.logger  = asset.symbol(settings.get('logger'))
+    self.factors   = [self._load(factor, settings) for factor in factors]
+    self.logger    = asset.symbol(settings.get('logger'))
+    self.pessimism = 1.0 / float(settings.get('pessimism', 10))
 
   #----------------------------------------------------------------------------
   def _load(self, factor, settings):
@@ -214,11 +216,12 @@ class Meter(object):
     for factor in self.factors:
       result   = factor.test(value, extra)
       scr, wgt = factor.adjust(result[0])
-      crv      = curve(scr)
+      crv      = curve(scr, offset=self.pessimism)
       if self.logger:
         self.logger.debug(
           'factor %s: score=%f, base-weight=%f, curve-weight=%f',
           factor.category, scr, wgt, crv)
+      wgt    *= crv
       score  += scr * wgt
       weight += wgt
       if result[1]:
