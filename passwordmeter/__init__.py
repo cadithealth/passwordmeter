@@ -124,7 +124,7 @@ class VarietyFactor(Factor):
 class NotWordFactor(Factor):
   category = 'notword'
   def test(self, value, extra):
-    if value in common10k:
+    if value.lower() in common10k:
       return (0, _('Avoid using one of the ten thousand most common passwords'))
     # TODO: check against dictionary words too... maybe use ispell?
     #         http://code.activestate.com/recipes/117221-spell-checking/
