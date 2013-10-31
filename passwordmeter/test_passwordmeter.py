@@ -68,11 +68,12 @@ class TestPasswordMeter(unittest.TestCase):
     meter = pwm.Meter()
     passwords = (
       '',
+      ' ',
       'password',
       'password1',
       'pssa',
-      'pss4wr',
       'pssawrd',
+      'pss4wr',
       'pss4wr0d',
       'p$$4wr0d!',
       'p$$4WR0d!',

@@ -140,9 +140,9 @@ class PhraseFactor(Factor):
     # todo: this might be improved... for example, i should:
     #   - value words of different lengths (large distribution) -- check stddev
     #   - check the likelihood that the elements are in fact words
-    if not value:
-      return (0, _(self.message))
     wlens  = [len(s) for s in value.split()]
+    if not wlens:
+      return (0, _(self.message))
     score  = asym(len(wlens), 4, switch=self.base)
     spread = max(wlens) - min(wlens)
     if spread <= 0:
