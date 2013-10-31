@@ -32,7 +32,7 @@ def asym(value, target, switch=DEFAULT_INFLECT):
 def curve(value):
   if value < 0:
     value = 0
-  return 1.0 / ( 0.1 + value )
+  return 1.0 / ( 0.05 + value )
 
 #------------------------------------------------------------------------------
 def curveavg(values):
@@ -156,11 +156,12 @@ class Meter(object):
   def __init__(self, settings=None):
     if settings is None:
       settings = dict()
-    # todo: make settings.factors be possibly a list...
-    self.factors = [
-      self._load(factor.strip(), settings)
-      for factor in
-      [s.strip() for s in settings.get('factors', DEFAULT_FACTORS).split(',')]]
+    self.threshold = float(settings.get('threshold', DEFAULT_INFLECT))
+    factors = settings.get('factors') or DEFAULT_FACTORS
+    if asset.isstr(factors):
+      factors = [s.strip() for s in factors.split(',')]
+    self.factors = [self._load(factor, settings) for factor in factors]
+    self.logger  = asset.symbol(settings.get('logger'))
 
   #----------------------------------------------------------------------------
   def _load(self, factor, settings):
@@ -200,7 +201,11 @@ class Meter(object):
     for factor in self.factors:
       result = factor.test(value, extra)
       s, w   = factor.adjust(result[0])
-      w      *= curve(s)
+      c      = curve(s)
+      if self.logger:
+        self.logger.debug(
+          'factor %s: score=%f, base-weight=%f, curve-weight=%f',
+          factor.category, s, w, c)
       score  += s * w
       weight += w
       if result[1]:
@@ -210,10 +215,7 @@ class Meter(object):
     if score < 1.0:
       # todo: this should be a slightly more intelligent selection process
       for scur, factor, reason in morelist:
-        if scur < DEFAULT_INFLECT:
-          more[factor.category] = reason
-      if not more and morelist:
-        for scur, factor, reason in morelist:
+        if scur < self.threshold:
           more[factor.category] = reason
     return (score, more)
 
