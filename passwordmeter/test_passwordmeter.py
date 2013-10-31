@@ -9,6 +9,11 @@
 import unittest
 import passwordmeter as pwm
 
+class TestFactor(pwm.Factor):
+  category = 'test'
+  def test(self, value, extra):
+    return (0.5, 'test value is: ' + value)
+
 #------------------------------------------------------------------------------
 class TestPasswordMeter(unittest.TestCase):
 
@@ -25,6 +30,22 @@ class TestPasswordMeter(unittest.TestCase):
       pwm.Meter(settings=dict(factors='notword')).test('password')[0], 0)
     self.assertEqual(
       pwm.Meter(settings=dict(factors='notword')).test('not0klsd@#$')[0], 1)
+
+  #----------------------------------------------------------------------------
+  def test_factorsAsString(self):
+    self.assertEqual(
+      pwm.Meter(settings=dict(
+        factors='length,passwordmeter.test_passwordmeter.TestFactor')).test('short')[1],
+      {'test': 'test value is: short',
+       'length': 'Increase the length of the password'})
+
+  #----------------------------------------------------------------------------
+  def test_factorsAsList(self):
+    self.assertEqual(
+      pwm.Meter(settings=dict(
+        factors=['length', TestFactor])).test('short')[1],
+      {'test': 'test value is: short',
+       'length': 'Increase the length of the password'})
 
   #----------------------------------------------------------------------------
   def test_strength(self):
