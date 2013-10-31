@@ -12,8 +12,8 @@ from .__init__ import Meter
 from .i18n import _
 
 ratings = (
+  'Infinitely weak',
   'Extremely weak',
-  'Excessively weak',
   'Very weak',
   'Weak',
   'Moderately strong',
@@ -30,6 +30,11 @@ def main(argv=None):
       ' a password is (0 = extremely weak, 1 = extremely strong)'
       ' and lists ways that a password can be improved.')
     )
+
+  cli.add_argument(
+    _('-v'), _('--verbose'),
+    dest='verbose', default=0, action='count',
+    help=_('enable verbose output to STDERR (for per-factor scoring)'))
 
   cli.add_argument(
     _('-i'), _('--ini'), metavar=_('FILENAME'),
@@ -62,6 +67,15 @@ def main(argv=None):
     options.password = sys.stdin.read()
   elif options.password is None:
     options.password = getpass.getpass()
+
+  if options.verbose:
+    # todo: use `logging`?...
+    class mylogger(object):
+      def debug(self, msg, *args, **kw):
+        if args:
+          msg = msg % args
+        sys.stderr.write(msg + '\n')
+    settings['logger'] = mylogger()
 
   meter   = Meter(settings=settings)
   result  = meter.test(options.password)
