@@ -67,43 +67,43 @@ class Factor(object):
 
 #------------------------------------------------------------------------------
 class LengthFactor(Factor):
+  category = 'length'
   def __init__(self, target=8, *args, **kw):
     super(LengthFactor, self).__init__(*args, **kw)
     self.target = int(target)
   def test(self, value, extra):
     value = len(value)
-    return (asym(value, self.target),
-            dict(length=_('Increase the length of the password')))
+    return (asym(value, self.target), _('Increase the length of the password'))
 
 #------------------------------------------------------------------------------
 class CharmixFactor(Factor):
+  category = 'charmix'
   matchers = (
     re.compile('[a-zA-Z]'),     # alpha / TODO: what about non-ascii letters?
     re.compile('[0-9]'),        # numeric
     re.compile('[^a-zA-Z0-9]'), # symbols
     )
   message = 'Use a good mix of numbers, letters, and symbols'
-  category = 'charmix'
   def test(self, value, extra):
     if not self.matchers:
       return 1.0
     scores    = [len(matcher.findall(value)) for matcher in self.matchers]
     target    = max(1, 0.25 * sum(scores) / len(scores))
     scores    = [asym(score, target) * 1 / DEFAULT_INFLECT for score in scores]
-    return (curveavg(scores),
-            dict({self.category: _(self.message)}))
+    return (curveavg(scores), _(self.message))
 
 #------------------------------------------------------------------------------
 class CasemixFactor(CharmixFactor):
+  category = 'casemix'
   matchers = (
     re.compile('[a-z]'),
     re.compile('[A-Z]'),
     )
   message = 'Use a good mix of UPPER case and lower case letters'
-  category = 'casemix'
 
 #------------------------------------------------------------------------------
 class VarietyFactor(Factor):
+  category = 'variety'
   def test(self, value, extra):
     diff = 1.0
     same = 0.0
@@ -115,14 +115,14 @@ class VarietyFactor(Factor):
     score = curveavg([
       len(set(value)) / max(1, float(len(value))),
       diff / (diff + same ** 1.5)])
-    return (
-      score, dict(charmix=_('Minimize character duplicates and repetitions')))
+    return (score, _('Minimize character duplicates and repetitions'))
 
 #------------------------------------------------------------------------------
 class NotWordFactor(Factor):
+  category = 'notword'
   def test(self, value, extra):
     if value in common10k:
-      return (0, dict(notword=_('Avoid using one of the ten thousand most common passwords')))
+      return (0, _('Avoid using one of the ten thousand most common passwords'))
     # TODO: check against dictionary words too... maybe use ispell?
     #         http://code.activestate.com/recipes/117221-spell-checking/
     # todo: check for 'l33t-speak'...
@@ -130,6 +130,7 @@ class NotWordFactor(Factor):
 
 #------------------------------------------------------------------------------
 class PhraseFactor(Factor):
+  category = 'phrase'
   base = 0.65
   message = 'Passphrases (e.g. an obfuscated sentence) are better than passwords'
   def test(self, value, extra):
@@ -144,7 +145,7 @@ class PhraseFactor(Factor):
     else:
       score *= asym(spread, 4, switch=self.base)
       score = self.base * ( 1 + score )
-    return (score, dict(phrase=_(self.message)))
+    return (score, _(self.message))
 
 #------------------------------------------------------------------------------
 class Meter(object):
@@ -153,9 +154,11 @@ class Meter(object):
   def __init__(self, settings=None):
     if settings is None:
       settings = dict()
+    # todo: make settings.factors be possibly a list...
     self.factors = [
       self._load(factor.strip(), settings)
-      for factor in settings.get('factors', DEFAULT_FACTORS).split(',')]
+      for factor in
+      [s.strip() for s in settings.get('factors', DEFAULT_FACTORS).split(',')]]
 
   #----------------------------------------------------------------------------
   def _load(self, factor, settings):
@@ -199,17 +202,22 @@ class Meter(object):
       score  += s * w
       weight += w
       if result[1]:
-        morelist.append((s, result[1]))
+        morelist.append((s, factor, result[1]))
     score = max(0, min(1, score / weight))
     more  = dict()
-    # todo: this should be a slightly more intelligent selection process
-    for scur, mcur in morelist:
-      if scur < score:
-        more.update(mcur)
-    if not more and morelist:
-      for scur, mcur in morelist:
-        more.update(mcur)
+    if score < 1.0:
+      # todo: this should be a slightly more intelligent selection process
+      for scur, factor, reason in morelist:
+        if scur < DEFAULT_INFLECT:
+          more[factor.category] = reason
+      if not more and morelist:
+        for scur, factor, reason in morelist:
+          more[factor.category] = reason
     return (score, more)
+
+#------------------------------------------------------------------------------
+def test(value, extra=None):
+  return Meter().test(value, extra=extra)
 
 #------------------------------------------------------------------------------
 # end of $Id$
