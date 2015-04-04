@@ -6,7 +6,9 @@
 # copy: (C) Copyright 2013 Cadit Health Inc., All Rights Reserved.
 #------------------------------------------------------------------------------
 
-import sys, argparse, getpass
+import sys
+import argparse
+import getpass
 
 from .__init__ import Meter
 from .i18n import _
@@ -19,7 +21,7 @@ ratings = (
   'Moderately strong',
   'Strong',
   'Very strong',
-  )
+)
 
 #------------------------------------------------------------------------------
 def main(argv=None):
@@ -29,7 +31,7 @@ def main(argv=None):
       'Password strength meter - gives a coefficient of how strong'
       ' a password is (0 = extremely weak, 1 = extremely strong)'
       ' and lists ways that a password can be improved.')
-    )
+  )
 
   cli.add_argument(
     _('-v'), _('--verbose'),
@@ -83,7 +85,7 @@ def main(argv=None):
   print 'Password strength: {} ({})'.format(
     result[0],
     _(ratings[min(len(ratings) - 1, int(result[0] * len(ratings)))])
-    )
+  )
 
   if result[1]:
     print 'Possible improvements:'

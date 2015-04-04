@@ -6,7 +6,9 @@
 # copy: (C) Copyright 2013 Cadit Health Inc., All Rights Reserved.
 #------------------------------------------------------------------------------
 
-import re, asset, pkg_resources
+import re
+import asset
+import pkg_resources
 
 from .i18n import _
 
@@ -20,7 +22,8 @@ DEFAULT_SPREAD  = 1.0
 DEFAULT_FACTORS = 'length,charmix,variety,casemix,notword,phrase'
 
 #------------------------------------------------------------------------------
-common10k = frozenset(asset.load('passwordmeter:res/common.txt').read().split('\n'))
+common10k = frozenset(
+  asset.load('passwordmeter:res/common.txt').read().decode().split('\n'))
 
 #------------------------------------------------------------------------------
 def asym(value, target, switch=DEFAULT_INFLECT):
