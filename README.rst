@@ -4,6 +4,14 @@ Password Strength Meter
 
 A configurable, extensible password strength measuring library.
 
+
+Project
+=======
+
+* Homepage: https://github.com/cadithealth/passwordmeter
+* Bugs: https://github.com/cadithealth/passwordmeter/issues
+
+
 TL;DR
 =====
 
@@ -34,6 +42,7 @@ Use on the command line:
     - Use a good mix of numbers, letters, and symbols
     - Avoid using one of the ten thousand most common passwords
     - Use a good mix of UPPER case and lower case letters
+
 
 Overview
 ========
