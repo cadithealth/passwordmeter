@@ -6,6 +6,8 @@
 # copy: (C) Copyright 2013 Cadit Health Inc., All Rights Reserved.
 #------------------------------------------------------------------------------
 
+from __future__ import print_function
+
 import sys
 import argparse
 import getpass
@@ -82,15 +84,15 @@ def main(argv=None):
   meter   = Meter(settings=settings)
   result  = meter.test(options.password)
 
-  print 'Password strength: {} ({})'.format(
+  print('Password strength: {} ({})'.format(
     result[0],
     _(ratings[min(len(ratings) - 1, int(result[0] * len(ratings)))])
-  )
+  ))
 
   if result[1]:
-    print 'Possible improvements:'
+    print('Possible improvements:')
     for item in result[1].values():
-      print '  -',item
+      print('  -',item)
 
   if result[0] >= options.minimum:
     return 0
