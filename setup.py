@@ -22,18 +22,18 @@ def read(*parts, **kw):
 test_dependencies = [
   'nose                 >= 1.3.0',
   'coverage             >= 3.5.3',
-  ]
+]
 
 dependencies = [
   'distribute           >= 0.6.24',
-  'asset                >= 0.0.4',
-  ]
+  'asset                >= 0.6.1',
+]
 
 entrypoints = {
   'console_scripts': [
     'pwm                = passwordmeter.cli:main',
-    ],
-  }
+  ],
+}
 
 classifiers = [
   'Development Status :: 1 - Planning',
@@ -45,7 +45,7 @@ classifiers = [
   'Natural Language :: English',
   'License :: OSI Approved :: MIT License',
   'License :: Public Domain',
-  ]
+]
 
 setup(
   name                  = 'passwordmeter',
@@ -66,7 +66,7 @@ setup(
   test_suite            = 'passwordmeter',
   entry_points          = entrypoints,
   license               = 'MIT (http://opensource.org/licenses/MIT)',
-  )
+)
 
 #------------------------------------------------------------------------------
 # end of $Id$
