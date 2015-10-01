@@ -3,6 +3,12 @@ ChangeLog
 =========
 
 
+v0.1.8
+======
+
+* Removed `distribute` dependency (thanks jlec)
+
+
 v0.1.7
 ======
 
